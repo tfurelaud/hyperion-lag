@@ -51,12 +51,12 @@ void HyperionMainDriver::load_mesh()
   // Read environments for initial conditions
   std::vector<std::pair<int, int>> ic_envs;
   gmsh::model::getPhysicalGroups(ic_envs, IC_ENV_DIM);
-  
+
   for (const auto& env : ic_envs) {
     int env_idx = env.second;
     std::string env_name;
     gmsh::model::getPhysicalName(2, env_idx, env_name);
-    
+
     std::vector<int> entities;
     gmsh::model::getEntitiesForPhysicalGroup(IC_ENV_DIM, env_idx, entities);
     for (const auto& e : entities) {
@@ -77,7 +77,7 @@ void HyperionMainDriver::load_mesh()
     int env_idx = env.second;
     std::string env_name;
     gmsh::model::getPhysicalName(BC_ENV_DIM, env_idx, env_name);
-    
+
     std::vector<std::size_t> nodes;
     std::vector<double> coords;
     gmsh::model::mesh::getNodesForPhysicalGroup(BC_ENV_DIM, env_idx, nodes, coords);
@@ -111,7 +111,7 @@ void HyperionMainDriver::load_mesh()
   // Create a VTK unstructured grid
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   this->m_mesh = vtkSmartPointer<vtkUnstructuredGrid>::New();
-  this->m_mesh->SetPoints(points); 
+  this->m_mesh->SetPoints(points);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   int nb_cells_to_allocate = 0;
@@ -131,18 +131,21 @@ void HyperionMainDriver::load_mesh()
   nodes.clear();
   std::vector<std::size_t> cells;
   gmsh::model::mesh::getElementsByType(MSH_QUAD_4, cells, nodes);
+
+  //for(auto &n:nodes) n--;
+
   for (std::size_t c = 0; c < cells.size(); ++c) {
     m_msh_vtk_cells[cells[c]] = c;
     m_vtk_msh_cells[c] = cells[c];
     // Insert connectivites, i.e. nodes connected to a cell
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    vtkIdType cell_points[4] = {nodes[c*4+0],nodes[c*4+1],nodes[c*4+2],nodes[c*4+3]};
+    vtkIdType cell_points[4] = {nodes[c*4+0]-1,nodes[c*4+1]-1,nodes[c*4+2]-1,nodes[c*4+3]-1};
     this->m_mesh->InsertNextCell(VTK_QUAD,4,cell_points);
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }
-  
+
   gmsh::finalize();
-	
+
   std::cout << "[Driver::load_mesh] Mesh created\n";
 }
 
@@ -151,13 +154,13 @@ void HyperionMainDriver::load_mesh()
 
 int HyperionMainDriver::run()
 {
-  
+
   auto vars = new HydroVars(m_mesh->GetNumberOfCells(),
                             m_mesh->GetNumberOfPoints());
   vars->setup_sod(m_dataset, m_cell_envs, m_vtk_msh_cells);
 
   auto hydro = new Hydro(m_dataset, m_mesh, vars);
-  
+
   hydro->init();
 
   std::cout << "[Driver::run] Simulation initialized, starting time loop\n";
