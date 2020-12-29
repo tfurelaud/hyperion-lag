@@ -14,6 +14,8 @@
 #include <vtkGenericCell.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkXMLUnstructuredGridWriter.h>
+#include <vtkInformationDoubleKey.h>
+#include "vtkInformation.h"
 #include <vtkDoubleArray.h>
 #include <vtkCellData.h>
 #include <vtkPointData.h>
@@ -392,7 +394,11 @@ void Hydro::dump(int step, double simulation_time)
 
   // Attach the simulation time to the mesh
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //this->m_mesh->SetInformation(simulation_time);
+  vtkDoubleArray *t = vtkDoubleArray::New();
+  t->SetName("TIME");
+  t->SetNumberOfComponents(1);
+  t->InsertNextValue(simulation_time);
+  this->m_mesh->GetFieldData()->AddArray(t);
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   add_cell_field(m_mesh, m_vars->m_pressure, "Pressure");
