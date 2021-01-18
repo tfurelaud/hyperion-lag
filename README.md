@@ -6,6 +6,10 @@ The example used in this project is heavily inspired by
 [MicroHydroProject](https://github.com/cea-hpc/Modane/tree/master/plugins/fr.cea.modane.ui/examples/MicroHydroProject)
 in the [Modane](https://github.com/cea-hpc/Modane) project from CEA.
 
+## Group
+- CAYROL Pierre
+- FURELAUD Thomas
+
 ## Compilation
 
 A compiler supporting the C++ 17 standard is required. A recent CMake version is recommended. As for third-party
